@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body { font-family: 'Open Sans', sans-serif; font-size: 12px;}
+      .section { margin-bottom: 20px; }
+      .section:not(:last-child) { border-bottom: 1px solid #dee2e6; padding-bottom: 20px; }
+      .form-control-sm { font-size: 12px; }
+      .btn { font-size: 12px; }
+      h4 { font-weight: bold; }
+      h6 { font-weight: bold; margin:0; }
+      p { font-size: 12px; margin: 0; }
+      ol { list-style-type: lower-alpha; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="mt-3 mb-3">
+        <h4 class="mt-3" id="form-header">Pocket App Guide</h4>
+        <p class="mb-2">Welcome to the guide to create a Pocket app. With the help of this guide, you will be able to setup a Pocket app and access your articles via the Pocket API.</p>
+        <p class="mb-2">Simply follow the guide to setup the app and establish a connection between the Google Sheet and your Pocket account.</p>
+      </div>
+
+      <hr>
+
+      <div class="mt-3 mb-3">
+        <h6 class="mb-2">1. Create a Pocket app</h6>
+        <p>Let's create a Developer app and get the necessary credentials to access your data.</p>
+        <ol>
+          <li>Navigate to the <a href="https://getpocket.com/developer/apps/new" target="_blank" rel="noopener noreferrer">Create App</a> menu.</li>
+          <li>Enter a preferred <b>Application Name</b> and <b>Application Description</b>.</li>
+          <li>For Permissions, select <b>Add</b>, <b>Modify</b> and <b>Retrieve</b>.</li>
+          <li>For Platforms, select <b>Web</b>.</li>
+          <li>Select <b>I accept</b> to agree to the Terms of Service.</li>
+          <li>Finally, select <b>Create Application</b>, to finish the process.</li>
+        </ol>
+
+        <hr>
+
+        <h6 class="mb-2">2. Enter Consumer Key</h6>
+        <p>After creating the app, navigate to the <a href="https://getpocket.com/developer/apps/" target="_blank" rel="noopener noreferrer">My Applications</a> menu.
+        <p class="mt-2">For you newly created app, copy the <b>Consumer Key</b> and paste it in the text box.</p>
+        <div class="mt-2 mb-2 d-grid gap-2">
+          <input type="text" class="form-control form-control-sm" id="consumerKey" placeholder="Paste your Consumer Key">
+          <button onclick="submitConsumerKey()" class="btn btn-primary btn-sm" id="keyButton">Validate Key</button>
+          <div id="keyStatus"></div>
+        </div>
+
+        <hr>
+
+        <h6 class="mb-2">3. Authorize Application</h6>
+        <p>Click on the button to open up the Pocket Authorization menu and authorize your App by clicking on <b>Authorize</b>.</p>
+        <div class="mt-2 mb-2 d-grid gap-2">
+          <a id="authLink" target="_blank" class="btn btn-primary btn-sm mb-2 disabled">Authorize App</a>
+        </div>
+
+        <hr>
+
+        <h6 class="mb-2">4. Complete Authorization</h6>
+        <p class="mt-2">For the final app creation step, click the button below.</p>
+        <div class="mt-2 mb-2 d-grid gap-2">
+          <button onclick="confirmAuth()" class="btn btn-success btn-sm disabled" id="completeButton">Complete Setup</button>
+          <div id="authStatus"></div>
+        </div>
+
+        <hr>
+
+        <h6 class="mb-2">5. Setup Sheets</h6>
+        <p>For our last step, we will create the two Google Sheets required for this application.</p>
+        <div class="mt-2 mb-2 d-grid gap-2">
+          <button onclick="setupGSheets()" class="btn btn-primary btn-sm disabled" id="setupSheets">Setup Sheets</button>
+          <div id="sheetStatus"></div>
+        </div>
+
+      </div>
+
+  <script>
+    function submitConsumerKey() {
+      const key = document.getElementById('consumerKey').value;
+      const status = document.getElementById('keyStatus');
+      const keyButton = document.getElementById('keyButton');
+
+      keyButton.disabled = true;
+      status.innerHTML = '<div class="spinner-border spinner-border-sm text-primary mt-2"></div>';
+
+      google.script.run
+        .withSuccessHandler(authUrl => {
+          status.innerHTML = '<div class="alert alert-success mt-2 py-2">Consumer Key validated!</div>';
+          document.getElementById('authLink').href = authUrl;
+          document.getElementById('authLink').classList.remove('disabled');
+          document.getElementById('completeButton').classList.remove('disabled');
+          document.getElementById('setupSheets').classList.remove('disabled');
+        })
+        .withFailureHandler(error => {
+          status.innerHTML = '<div class="alert alert-danger mt-2 py-2">Consumer Key invalid! Please try again.</div>';
+          keyButton.disabled = false;
+        })
+        .getRequestToken(key);
+    }
+
+    function confirmAuth() {
+      const status = document.getElementById('authStatus');
+      const button = document.getElementById('completeButton');
+
+      button.disabled = true;
+      status.innerHTML = '<div class="spinner-border spinner-border-sm text-primary mt-2"></div>';
+
+      google.script.run
+        .withSuccessHandler(() => {
+          status.innerHTML = '<div class="alert alert-success mt-2 py-2">Authentication complete!</div>';
+        })
+        .withFailureHandler(error => {
+          status.innerHTML = '<div class="alert alert-danger mt-2 py-2">Authorization failed</div>';
+          button.disabled = false;
+        })
+        .completeAuth();
+    }
+
+    function setupGSheets() {
+      const status = document.getElementById('sheetStatus');
+      const button = document.getElementById('setupSheets');
+
+      button.disabled = true;
+      status.innerHTML = '<div class="spinner-border spinner-border-sm text-primary mt-2"></div>';
+
+      google.script.run
+        .withSuccessHandler(() => {
+          status.innerHTML = '<div class="alert alert-success mt-2 py-2">Sheets setup complete!</div>';
+        })
+        .withFailureHandler(error => {
+          status.innerHTML = '<div class="alert alert-danger mt-2 py-2">Sheets setup failed</div>';
+          button.disabled = false;
+        })
+        .setupSheets();
+    }
+  </script>
+</body>
+</html>
