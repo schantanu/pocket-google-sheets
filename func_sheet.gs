@@ -35,11 +35,11 @@ function setFontSize(sheetName) {
 function resetSheet(sheetName, clearType = 'formats') {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName(sheetName);
+    let sheet = ss.getSheetByName(sheetName);
 
     // Insert new sheet if not exists
     if (!sheet) {
-      ss.insertSheet(sheetName);
+      sheet = ss.insertSheet(sheetName); // Assign the new sheet
     } else {
       // Clear based on clearType parameter
       switch(clearType) {
@@ -52,16 +52,20 @@ function resetSheet(sheetName, clearType = 'formats') {
       }
     }
 
-    // Check if the sheet exists and has a filter, then remove the filter
-    if (sheet && typeof sheet.getFilter === 'function') {
-      const filter = sheet.getFilter();
-      if (filter) {
-        filter.remove();
-      }
+    // Check if the sheet has a filter, then remove the filter
+    if (sheet.getFilter()) {
+      sheet.getFilter().remove();
     }
 
     // Set Font Size
     setFontSize(sheetName);
+
+    // Add empty rows
+    const currentRows = sheet.getMaxRows();
+    const rowsToAdd = 10000 - currentRows;
+    if (rowsToAdd > 0) {
+      sheet.insertRowsAfter(currentRows, rowsToAdd);
+    }
   } catch (error) {
     Logger.log(error.stack);
   }
