@@ -1,6 +1,6 @@
-# Pocket to Google Sheets Integration
+# Pocket to Google Sheets
 
-A Google Apps Script project that syncs your [Pocket](https://getpocket.com/) articles with [Google Sheets](https://sheets.google.com/), enabling easy management and organization of your saved Pocket articles utilizing Google Sheets features. This project utilizes the Pocket v3 API to enable Google Sheets integration.
+A Google Apps Script project that syncs your [Pocket](https://getpocket.com/) articles with [Google Sheets](https://sheets.google.com/), enabling easy management and organization of your saved Pocket articles utilizing Google Sheets features. This project utilizes the [Pocket v3 API](https://getpocket.com/developer/docs/overview) to enable Google Sheets integration.
 
 ## Features
 
